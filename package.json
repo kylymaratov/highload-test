@@ -1,0 +1,41 @@
+{
+  "name": "highload-test",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "node dist/common/database/migration-scripts/up.js && cross-env NODE_ENV=production node dist/main.js",
+    "dev": "cross-env NODE_ENV=development nodemon --watch src src/main.ts",
+    "test": "artillery run ./update.balance.test.yml",
+    "build": "npx tsc",
+    "migration:generate": "ts-node src/common/database/migration-scripts/generate.ts",
+    "migration:run": "ts-node src/common/database/migration-scripts/up.ts",
+    "migration:down": "ts-node src/common/database/migration-scripts/down.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "module-alias": "^2.2.3",
+    "pg": "^8.13.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.5",
+    "tsconfig-paths": "^4.2.0",
+    "umzug": "^3.8.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/module-alias": "^2.0.4",
+    "@types/sequelize": "^4.28.20",
+    "@types/umzug": "^2.3.9",
+    "nodemon": "^3.1.9",
+    "sequelize-cli": "^6.6.2",
+    "ts-node": "^10.9.2"
+  }
+}
