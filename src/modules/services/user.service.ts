@@ -1,13 +1,13 @@
-import { sequelize } from "@/common/database/database";
 import User from "@/common/database/schemas/user.schema";
 import { ServerError } from "@/common/server/server.exception";
 import { NextFunction, Request, Response } from "express";
+import { Op } from "sequelize";
+import { Sequelize } from "sequelize";
 
 export class UserService {
   constructor() {}
 
   async updateBalance(req: Request, res: Response, next: NextFunction) {
-    const updateTransaction = await sequelize.transaction();
     try {
       const { userId, amount } = req.body;
 
@@ -15,26 +15,22 @@ export class UserService {
 
       if (isNaN(doAmount)) throw new ServerError("Amount field is NaN", 400);
 
-      const user = await User.findOne({
-        where: { id: userId },
-        lock: true,
-        transaction: updateTransaction,
-      });
+      const [affectedRows, updatedUsers] = await User.update(
+        { balance: Sequelize.literal(`balance + ${doAmount}`) },
+        {
+          where: {
+            id: userId,
+            balance: { [Op.gte]: -doAmount },
+          },
+          returning: true,
+        }
+      );
 
-      if (!user) throw new ServerError("User not found in database", 404);
+      if (affectedRows === 0)
+        throw new ServerError("Insufficient funds or user not found", 400);
 
-      if (user.balance + doAmount < 0)
-        throw new ServerError("The balance cannot be below zero", 400);
-
-      user.balance += doAmount;
-
-      await user.save({ transaction: updateTransaction });
-
-      await updateTransaction.commit();
-
-      res.json({ userId: user.id, balance: user.balance });
+      res.json({ userId, balance: updatedUsers[0].balance });
     } catch (error) {
-      await updateTransaction.rollback();
       next(error);
     }
   }
