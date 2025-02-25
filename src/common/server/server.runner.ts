@@ -1,11 +1,11 @@
 import { Express } from "express";
 import { serverConfig } from "./server.config";
 import { sequelize } from "@/common/database/database";
-import { createUser } from "@/common/database/scripts/user.scripts";
+// import { createUser } from "@/common/database/scripts/user.scripts";
 
 const beforeRun = async () => {
   await sequelize.authenticate();
-  await createUser();
+  // await createUser();
 };
 
 const afterRun = () => {
