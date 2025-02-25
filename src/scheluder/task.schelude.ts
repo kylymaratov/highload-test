@@ -1,21 +1,27 @@
-import { Op } from "sequelize";
 import { Sequelize } from "sequelize";
 import { v4 } from "uuid";
 import os from "os";
 import Task from "@/common/database/schemas/task.schema";
 import TaskLogs from "@/common/database/schemas/task.logs.schema";
+import { Op } from "sequelize";
+import EventEmitter from "events";
+import serverEmitter from "@/common/server/server.emitter";
 
-export class TaskScheluder {
+export class TaskScheduler {
   private instanceId: string = `${os.hostname()}-${v4()}`;
-  private timeout: number = 120_000_000;
+  private timeout: number = 10000;
+  // Зная количество запущенных экземпляров можно распределялись задачи более равномерно
+  // private instancesCount: 5 | null = null;
 
   private async getTasks() {
     const avialableTasks = await Task.findAll({
       where: {
-        is_running: false,
+        isRunning: false,
         [Op.or]: [
-          { last_run_at: null },
-          { last_run_at: { [Op.lte]: new Date(Date.now() - 2 * 60 * 1000) } },
+          { lastRunTime: null },
+          Sequelize.literal(
+            `EXTRACT(EPOCH FROM NOW() - "Task"."lastRunTime") * 1000 >= "Task"."intervalSeconds" * 1000`
+          ),
         ],
       },
       order: Sequelize.literal("random()"),
@@ -28,26 +34,7 @@ export class TaskScheluder {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
 
-  async start() {
-    const tasks = await this.getTasks();
-
-    for (const task of tasks) {
-      const locked = await Task.update(
-        {
-          isRunning: true,
-          runningInstanceId: this.instanceId,
-          lastRunTime: new Date(),
-        },
-        { where: { id: task.id, isRunning: false } }
-      );
-
-      if (locked[0] === 0) continue;
-
-      this.process(task);
-    }
-  }
-
-  private async endTask(task: any) {
+  private async endTask(task: any, status: "success" | "error") {
     await Task.update(
       {
         isRunning: false,
@@ -60,19 +47,63 @@ export class TaskScheluder {
       taskName: task.name,
       instanceId: this.instanceId,
       finishedAt: new Date(),
+      status,
+    });
+    serverEmitter.emit("task_log", {
+      task,
+      instanceId: this.instanceId,
+      status: "completed",
     });
   }
 
   private async process(task: any) {
     try {
-      console.info(`Task ${task.name} instanceId: ${task.runningInstanceId}`);
+      console.info(`Task ${task.name} started instanceId: ${this.instanceId}`);
+      serverEmitter.emit("task_log", {
+        task,
+        instanceId: this.instanceId,
+        status: "started",
+      });
 
       await this.wait(this.timeout);
-      await this.endTask(task);
-
-      console.info(`Task ${task.name} completed on ${task.runningInstanceId}`);
+      await this.endTask(task, "success");
+      console.info(`Task ${task.name} completed on ${this.instanceId}`);
     } catch (error) {
-      console.error(`Task failed ${task.name} on ${task.runningInstanceId}`);
+      console.error(`Task failed ${task.name} on ${this.instanceId}: ${error}`);
+      await this.endTask(task, "error");
+    }
+  }
+
+  async revert() {
+    try {
+      await Task.update(
+        { isRunning: false, runningInstanceId: null },
+        { where: { isRunning: true, runningInstanceId: this.instanceId } }
+      );
+    } catch {}
+  }
+
+  async start() {
+    try {
+      serverEmitter.emit("update_current_stat", {});
+      const tasks = await this.getTasks();
+
+      for (const task of tasks) {
+        const locked = await Task.update(
+          {
+            isRunning: true,
+            runningInstanceId: this.instanceId,
+            lastRunTime: new Date(),
+          },
+          { where: { id: task.id, isRunning: false } }
+        );
+
+        if (locked[0] === 0) continue;
+
+        this.process(task);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 }

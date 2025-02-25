@@ -7,12 +7,17 @@ export const up = async (queryInterface: QueryInterface, Sequelize: any) => {
       primaryKey: true,
       autoIncrement: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+    },
     isRunning: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
     },
-    interval: {
+    intervalSeconds: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -23,14 +28,15 @@ export const up = async (queryInterface: QueryInterface, Sequelize: any) => {
     },
     runningInstanceId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
     },
-    updated_at: {
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),

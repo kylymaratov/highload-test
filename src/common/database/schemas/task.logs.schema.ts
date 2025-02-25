@@ -7,6 +7,7 @@ class TaskLogs extends Model {
   public instanceId!: string;
   public startedAt!: Date;
   public finishedAt!: Date;
+  public status!: "success" | "error";
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -37,12 +38,16 @@ TaskLogs.init(
       allowNull: true,
       defaultValue: null,
     },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "success",
+    },
   },
   {
     sequelize,
     tableName: "task_logs",
     timestamps: true,
-    underscored: true,
   }
 );
 

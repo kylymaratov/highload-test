@@ -4,6 +4,7 @@
   "main": "dist/main.js",
   "scripts": {
     "start": "node dist/common/database/migration-scripts/up.js && cross-env NODE_ENV=production node dist/main.js",
+    "start:multi": "concurrently \"npm run start -- --instance=1 --port=5001\" \"npm run start -- --instance=2 --port=5002\" \"npm run start -- --instance=3 --port=5003\" \"npm run start -- --instance=4 --port=5004\" \"npm run start -- --instance=5 --port=5005\"",
     "dev": "cross-env NODE_ENV=development nodemon --watch src src/main.ts",
     "test": "artillery run ./update.balance.test.yml",
     "build": "npx tsc",
@@ -26,6 +27,7 @@
     "pg": "^8.13.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.5",
+    "socket.io": "^4.8.1",
     "tsconfig-paths": "^4.2.0",
     "umzug": "^3.8.2",
     "uuid": "^11.1.0"
@@ -37,6 +39,7 @@
     "@types/node-cron": "^3.0.11",
     "@types/sequelize": "^4.28.20",
     "@types/umzug": "^2.3.9",
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.9",
     "sequelize-cli": "^6.6.2",
     "ts-node": "^10.9.2"

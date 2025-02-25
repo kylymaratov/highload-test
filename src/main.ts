@@ -1,4 +1,5 @@
 import "./alias";
+import "./scheluder";
 
 import express from "express";
 import { setServerCors } from "@/common/server/server.cors";

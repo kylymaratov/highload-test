@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task</title>
+    <script
+      src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+      integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      const socket = io("/logs");
+      const socket2 = io("/tasks");
+
+      socket.on("task_log", ({ task, instanceId, status }) => {
+        document.getElementById(
+          "task-list"
+        ).innerHTML += `<li>Task ${task.name} | ${instanceId} | interval ${task.intervalSeconds}s | last run time ${task.lastRunTime} -- ${status}</li>`;
+      });
+
+      socket2.on("current_stat", (data) => {
+        document.getElementById("current_stat").innerHTML = JSON.stringify(data);
+      });
+    </script>
+  </head>
+  <body
+    style="display: flex; justify-content: space-between"
+  >
+    <div style="width: 50%;">
+      <h1>Task logs</h1>
+      <ul id="task-list">
+        Loading...
+      </ul>
+    </div>
+    <div style="width: 50%;">
+        <h1>Current status</h1>
+       <ul id="current_stat">
+      </ul>
+    </div>
+    </div>
+  </body>
+</html>

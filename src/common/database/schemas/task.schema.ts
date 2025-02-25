@@ -3,8 +3,9 @@ import { sequelize } from "../database";
 
 class Task extends Model {
   public id!: number;
+  public name!: string;
   public isRunning!: boolean;
-  public intervalSeconds!: boolean;
+  public intervalSeconds!: number;
   public lastRunTime!: Date;
   public runningInstanceId!: string;
 
@@ -18,6 +19,11 @@ Task.init(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
     },
     isRunning: {
       type: DataTypes.BOOLEAN,
@@ -35,14 +41,14 @@ Task.init(
     },
     runningInstanceId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {
     sequelize,
     tableName: "tasks",
     timestamps: true,
-    underscored: true,
   }
 );
 
