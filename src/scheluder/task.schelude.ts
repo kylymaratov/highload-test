@@ -49,7 +49,7 @@ export class TaskScheduler {
       finishedAt: new Date(),
       status,
     });
-    serverEmitter.emit("task_log", {
+    serverEmitter.emit("log", {
       task,
       instanceId: this.instanceId,
       status: "completed",
@@ -59,7 +59,7 @@ export class TaskScheduler {
   private async process(task: any) {
     try {
       console.info(`Task ${task.name} started instanceId: ${this.instanceId}`);
-      serverEmitter.emit("task_log", {
+      serverEmitter.emit("log", {
         task,
         instanceId: this.instanceId,
         status: "started",
@@ -85,7 +85,7 @@ export class TaskScheduler {
 
   async start() {
     try {
-      serverEmitter.emit("update_current_stat", {});
+      serverEmitter.emit("stat", {});
       const tasks = await this.getTasks();
 
       for (const task of tasks) {

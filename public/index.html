@@ -3,42 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task</title>
+    <link type="text/css" rel="stylesheet" href="style.css" />
+    <title>Monitor</title>
     <script
       src="https://cdn.socket.io/4.8.1/socket.io.min.js"
       integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
       crossorigin="anonymous"
     ></script>
-
-    <script>
-      const socket = io("/logs");
-      const socket2 = io("/tasks");
-
-      socket.on("task_log", ({ task, instanceId, status }) => {
-        document.getElementById(
-          "task-list"
-        ).innerHTML += `<li>Task ${task.name} | ${instanceId} | interval ${task.intervalSeconds}s | last run time ${task.lastRunTime} -- ${status}</li>`;
-      });
-
-      socket2.on("current_stat", (data) => {
-        document.getElementById("current_stat").innerHTML = JSON.stringify(data);
-      });
-    </script>
   </head>
-  <body
-    style="display: flex; justify-content: space-between"
-  >
-    <div style="width: 50%;">
-      <h1>Task logs</h1>
-      <ul id="task-list">
-        Loading...
-      </ul>
-    </div>
-    <div style="width: 50%;">
-        <h1>Current status</h1>
-       <ul id="current_stat">
-      </ul>
-    </div>
+  <body>
+    <div class="root">
+      <div class="nav">
+        <button type="button" class="btn" id="log" onclick="showLogsScreen()">
+          Task logs
+        </button>
+        <button
+          type="button"
+          class="btn"
+          id="process"
+          onclick="showInProcessScreen()"
+        >
+          In Process
+        </button>
+        <button
+          type="button"
+          class="btn"
+          id="scheluded"
+          onclick="showScheludedScreen()"
+        >
+          Scheluded
+        </button>
+      </div>
+      <div id="monitor" class="monitor"></div>
     </div>
   </body>
+  <script src="script.js"></script>
 </html>

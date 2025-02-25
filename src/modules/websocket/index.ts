@@ -18,13 +18,13 @@ export class SocketIo extends Server {
       maxHttpBufferSize: 1e8,
     });
 
-    serverEmitter.on("task_log", (data) => {
-      this.of("/logs").emit("task_log", data);
+    serverEmitter.on("log", (data) => {
+      this.of("/logs").emit("log", data);
     });
-    serverEmitter.on("update_current_stat", async () => {
+    serverEmitter.on("stat", async () => {
       const data = await getCurrentStat();
 
-      this.of("/tasks").emit("current_stat", data);
+      this.of("/tasks").emit("stat", data);
     });
   }
 

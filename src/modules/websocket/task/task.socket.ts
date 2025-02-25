@@ -8,7 +8,7 @@ export class TaskSocket implements TSocket {
     try {
       const data = await getCurrentStat();
 
-      socket.emit("current_stat", data);
+      socket.emit("stat", data);
     } catch (e) {}
   }
 
